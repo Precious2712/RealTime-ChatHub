@@ -5,7 +5,7 @@ const roomSchema = new mongoose.Schema(
         roomName: {
             type: String,
             required: true,
-            unique: true,     
+            unique: true,
             trim: true
         },
 
@@ -20,19 +20,23 @@ const roomSchema = new mongoose.Schema(
             required: true
         },
 
-        members: [
-            {
-                memberId: {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: "User",
-                    required: true
-                },
-                memberName: {
-                    type: String,
-                    required: true
+        members: {
+            type: [
+                {
+                    memberId: {
+                        type: mongoose.Schema.Types.ObjectId,
+                        ref: "User",
+                        required: true
+                    },
+                    memberName: {
+                        type: String,
+                        required: true
+                    }
                 }
-            }
-        ]
+            ],
+            default: []   // ✅ VERY IMPORTANT
+        }
+
     },
     { timestamps: true }
 );

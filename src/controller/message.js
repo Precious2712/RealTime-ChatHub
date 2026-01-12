@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 
 const loadChatMsgHistory = async (req, res) => {
     try {
-        const loggedInUserId = req.user.id; 
+        const loggedInUserId = req.user.id;
         const otherUserId = req.params.userId;
 
         if (!mongoose.Types.ObjectId.isValid(otherUserId)) {
@@ -20,12 +20,13 @@ const loadChatMsgHistory = async (req, res) => {
             .sort({ createdAt: 1 });
 
         res.status(200).json(messages);
-        
+
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Failed to load chat history" });
     }
 };
+
 
 
 module.exports = {
