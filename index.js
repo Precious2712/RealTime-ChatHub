@@ -12,8 +12,32 @@ const initSocket = require("./src/config/socket");
 const app = express();
 const server = createServer(app);
 
+const allowedOrigins = [
+    "https://talk-flow-ten.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:5175",
+];
 
-app.use(cors());
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            if (!origin) return callback(null, true);
+
+            if (allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            }
+
+            return callback(new Error("Not allowed by CORS"));
+        },
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+    })
+);
+
+app.options("*", cors());
+
+
 app.use(express.json());
 
 

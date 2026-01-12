@@ -11,12 +11,20 @@ const userStatus = new Map();
 
 const awayTimers = new Map();
 
+const allowedOrigins = [
+    "https://talk-flow-ten.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:5175",
+];
+
 module.exports = function initSocket(server) {
     const io = new Server(server, {
         cors: {
-            origin: "*",
-            methods: ["GET", "POST"]
-        }
+            origin: allowedOrigins,
+            methods: ["GET", "POST"],
+            allowedHeaders: ["Authorization"],
+        },
     });
 
     // 🔐 socket auth
@@ -107,7 +115,7 @@ module.exports = function initSocket(server) {
             });
         });
 
-        
+
         socket.on("create-room", async ({ roomName }) => {
             if (!roomName) return;
 
@@ -121,7 +129,7 @@ module.exports = function initSocket(server) {
                 createdBy: socket.user._id,
                 createdUserName: socket.user.firstName,
 
-                
+
                 members: [
                     {
                         memberId: socket.user._id,
@@ -130,7 +138,7 @@ module.exports = function initSocket(server) {
                 ]
             });
 
-            
+
             socket.join(`room:${room._id}`);
 
             io.emit("room-created", room);
@@ -197,7 +205,7 @@ module.exports = function initSocket(server) {
 
             const requesterId = socket.user._id.toString();
 
-            
+
             const isCreator = String(room.createdBy) === requesterId;
             const isMember = room.members.some(
                 m => String(m.memberId) === requesterId
@@ -207,7 +215,7 @@ module.exports = function initSocket(server) {
                 return socket.emit("error", "You are not allowed to add members");
             }
 
-            
+
             const alreadyMember = room.members.some(
                 m => String(m.memberId) === String(memberId)
             );
@@ -216,7 +224,7 @@ module.exports = function initSocket(server) {
                 return socket.emit("error", "User already in room");
             }
 
-           
+
             const userToAdd = await User.findById(memberId);
             if (!userToAdd) {
                 return socket.emit("error", "User does not exist");
@@ -231,7 +239,7 @@ module.exports = function initSocket(server) {
 
             io.to(`user:${memberId}`).socketsJoin(`room:${roomId}`);
 
-            
+
             io.to(`room:${roomId}`).emit("member-added", {
                 roomId,
                 memberId: userToAdd._id,
@@ -256,7 +264,7 @@ module.exports = function initSocket(server) {
             );
         });
 
-        
+
         socket.on("disconnect", () => {
             const sockets = onlineUsers.get(userId);
             if (!sockets) return;
